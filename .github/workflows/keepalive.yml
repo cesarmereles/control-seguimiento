@@ -1,0 +1,39 @@
+name: Mantener Supabase activo
+
+# Cada 3 días hace una consulta mínima a la base para que el plan gratis
+# de Supabase no pause el proyecto por inactividad.
+on:
+  schedule:
+    - cron: "17 11 */3 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Latido a Supabase
+        run: |
+          curl -fsS -X POST "https://lxiqofqikkxoyssdabrs.supabase.co/rest/v1/rpc/ctl_ping" \
+            -H "apikey: sb_publishable_7qTJ-YugXFXcNahAuVg90g_zzEvICpU" \
+            -H "Content-Type: application/json" -d '{}'
+          echo
+          echo "Supabase respondió OK"
+
+      # GitHub desactiva las tareas programadas si el repo no tiene cambios en 60 días.
+      # Si pasaron 45 días sin commits, hace uno vacío para mantenerlo activo.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Mantener activo el repositorio
+        run: |
+          dias=$(( ( $(date +%s) - $(git log -1 --format=%ct) ) / 86400 ))
+          echo "Días desde el último commit: $dias"
+          if [ "$dias" -ge 45 ]; then
+            git config user.name "keepalive-bot"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit --allow-empty -m "Mantener activo (keepalive)"
+            git push
+          fi
