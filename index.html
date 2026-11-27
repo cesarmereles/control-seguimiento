@@ -484,7 +484,7 @@ function drawChart(id,cfg){ charts[id]?.destroy(); charts[id]=new Chart(document
 
 function initMap(){
   map=L.map("map",{zoomControl:true}).setView([-27.2,-55.1],8);
-  L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",{attribution:'&copy; OpenStreetMap &copy; CARTO',maxZoom:18}).addTo(map);
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:'&copy; OpenStreetMap',maxZoom:19}).addTo(map);
   layer=L.layerGroup().addTo(map); renderMap();
 }
 function renderMap(){
