@@ -180,6 +180,14 @@ td.r,th.r{text-align:right}
 .lb .prev{left:18px}.lb .next{right:18px}
 .lb .cl{position:absolute;top:14px;right:18px;background:transparent;color:#fff;border:0;font-size:28px;cursor:pointer}
 .up-status{font-size:13px;color:var(--brand);margin-top:8px;min-height:18px}
+.dev{display:flex;align-items:center;gap:14px;max-width:1320px;margin:0 auto;padding:18px 24px 28px;border-top:1px solid var(--line);color:var(--muted);font-size:12.5px;line-height:1.45}
+.login-card .dev{padding:18px 0 0;margin-top:26px}
+.dev-logo{width:52px;height:52px;flex:none;background:#fff;border:1px solid var(--line);border-radius:12px;padding:4px}
+.dev .dev-by{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em}
+.dev b{display:block;color:#0d2a4a;font-size:14.5px;letter-spacing:.02em}
+.dev span{display:block}
+.dev a{color:var(--brand);font-weight:600;text-decoration:none}
+@media (max-width:640px){.hero-stats b{font-size:18px;white-space:nowrap}.ig-hero{margin-bottom:20px}}
 
 @media (max-width:1050px){
   .kpis{grid-template-columns:repeat(2,1fr)} .grid-2,.grid-3,.forms{grid-template-columns:1fr}
@@ -222,6 +230,7 @@ td.r,th.r{text-align:right}
         <button class="btn btn-ghost" type="button" id="magicBtn">¿Primera vez u olvidaste la contraseña? Recibir link por email</button>
       </div>
       <div class="msg" id="lMsg"></div>
+      <footer class="dev"><img class="dev-logo" alt="CM"><div><div class="dev-by">Desarrollado por</div><b>César A. Mereles</b><span>Analista de Sistemas · Desarrollo de Software · Automatización · IA Aplicada</span><a href="mailto:cesarmereles@gmail.com">cesarmereles@gmail.com</a></div></footer>
     </form>
   </div>
 </section>
@@ -382,6 +391,7 @@ td.r,th.r{text-align:right}
       </div>
     </div>
   </main>
+  <footer class="dev"><img class="dev-logo" alt="CM"><div><div class="dev-by">Desarrollado por</div><b>César A. Mereles</b><span>Analista de Sistemas · Desarrollo de Software · Automatización · IA Aplicada</span><a href="mailto:cesarmereles@gmail.com">cesarmereles@gmail.com</a></div></footer>
 </section>
 
 <div class="toast" id="toast"></div>
@@ -647,6 +657,8 @@ $("#tabs").addEventListener("click",e=>{
 });
 
 // FOTOS
+const DEVLOGO="data:image/png;base64,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";
+$$(".dev-logo").forEach(i=>i.src=DEVLOGO);
 const LOGO="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABABAMAAABYR2ztAAAAMFBMVEX7/f0AAAADbrEpktD7+/tfp9GjzeX19fb39/guh72Gu9murq95eXlkZGSjpKS+vsB3gItTAAAAEHRSTlP9AP//CP//YqH//wwGp19lNTn3YAAABApJREFUeNp91s+LJHcZBvBPVXX3TK9Z6SJIEFyZtKhEtneLDDE4Ae2FXJSEtJocdgnJZJccQmKYEPEm7ME/oDUieFhpFC/uwcGAuXjYQA6rGCnSmI0B3UYhm5gfXRCSbE9PdXn4Vs/07krqUlQ9z/et93l/VpSqr6SXJ+d+VIh++Zc86eXL11F6iH/9G+fB+jMXDhlLQtIbPzpcnrK2NV4yloRsFWdta1zeQNjMb8BZ20peXSEk5eM34qwdyXKIQe/em3Gz58eHFhLvhbeth/6l+90z4eGUfEnITgYDp/8cFN03grWjZU1IknegdbxY2j+xC8/lefChdxo8cIB7bQS/GAcLSfYn+F6+4mL0T7i/zCVtd+9P0PyEKG232+32+nU+9z7+3b0mpuzDMdJO/NXNzbs3opT9ERo5URpcjDekvvS7IPbBSVWsvx7cjGV3wYY07gXc3osbkevbeCGRtO/ILpN0UsdH4jvTNE2n5ZWt2fWrBc1pFSfJEA9Fjo0YgBEv6rQxy7LYGPJOsos+2GXvteipAXqSrdsntD+7fjzHP8C1gsXWpasFf+3GZYbTnWSEZp0y+EPURJLHyRAnfA0agVDB3FHMsjiHF+IRzEgyQrFl0QBlnKDZmS/dn7+Ebfi1CbI4wsIGKOh/Eu7MtdDRR7IZPt7tfpmz3W6gf/8eNOIM26EymzzNb2oZOpDEOfqRWkTOvJZhBGWchdAFEckIWS03XiCJO7BXH5mHSM9WSiteqbNCBuu19SB3lTAM3/qYlTZaITQldSMr/i+hIYixW+s0OiC0goi9um9rncFCgU4DBsFH9kO6FjGqkM25g3LCE8H/7cNAjRbbGNYlWacteBpCTXFQTrT+S05rEqGM30DsrYNyCploUTmDH8cV5kXFbJmT8o9UPFZdQhGXcHIxMFq6uVHVid1FHmch9W85X0f4bKNktp34EJLo1MkhzS92eh/hIs5+0MTFzeqDCWtHvdKH7uY9aI6gNcS5ze4AjfvjwRU4XywGzPfg0R2O5FW0ix+UsR6cq4r/bPPUgOYJWt9WlDAWl+UO5juV8bby9COPDHe0HpxM9bGW51G6uX8J7c+HCdM6M/Lk30w13kSj/+pyBPnZUCreSE0XE1O+OQojKEpl3zqP5jGE0V8VLCZYv60Uh35l3sd0Op1OpwXJBPYzYvKfg19lK7vgPtAvSdqqOwaX4cqpt5f4vWGaT6+RtHn37x+BKw9fBc9HoS+erd5eroPfd+qzv93lM3XbHK4DR2bvufUKCyWGjy9cvhX/yZuhGtM0TdMvpDs342vpy2mapulyLb7x8KeuxU9ZrMveHF+4WNyA925q3vLcV+58Kex26z88Mr5luZP0cq//tKMqvjNY+T34H0Z8VMukx4O4AAAAAElFTkSuQmCC";
 $$(".brand-img").forEach(i=>i.src=LOGO);
 {const l=document.createElement("link");l.rel="icon";l.href=LOGO;document.head.appendChild(l);}
