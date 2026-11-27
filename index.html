@@ -76,7 +76,7 @@ main{max-width:1320px;margin:0 auto;padding:26px 24px 60px}
 .panel-h h3{margin:0;font-size:15px}
 .panel-b{padding:16px 18px 18px}
 
-.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:18px}
 .kpi{padding:16px 18px;position:relative;overflow:hidden}
 .kpi .lbl{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 .kpi .val{font-size:32px;font-weight:700;margin-top:6px;letter-spacing:-.02em}
@@ -85,6 +85,7 @@ main{max-width:1320px;margin:0 auto;padding:26px 24px 60px}
 .kpi.accent .lbl,.kpi.accent .hint{color:#b9e4e7}
 .bar{height:6px;background:rgba(255,255,255,.2);border-radius:99px;margin-top:12px;overflow:hidden}
 .bar i{display:block;height:100%;background:#7fe3ea;border-radius:99px}
+.bar.plan{background:#e8eef1}.bar.plan i{background:var(--brand-2)}
 
 .grid-2{display:grid;grid-template-columns:1.55fr 1fr;gap:14px;margin-bottom:14px}
 .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
@@ -224,6 +225,7 @@ td.r,th.r{text-align:right}
       <div class="kpis">
         <div class="panel kpi accent"><div class="lbl">Cobertura de reposición</div><div class="val num" id="kPct">–</div><div class="bar"><i id="kPctBar" style="width:0"></i></div><div class="hint" id="kPctHint"></div></div>
         <div class="panel kpi"><div class="lbl">Equipos entregados</div><div class="val num" id="kEq">–</div><div class="hint" id="kEqHint"></div></div>
+        <div class="panel kpi"><div class="lbl">Disponible del plan</div><div class="val num" id="kDisp">–</div><div class="bar plan"><i id="kDispBar" style="width:0"></i></div><div class="hint" id="kDispHint"></div></div>
         <div class="panel kpi"><div class="lbl">Pendiente de reponer</div><div class="val num" id="kPend">–</div><div class="hint" id="kPendHint"></div></div>
         <div class="panel kpi"><div class="lbl">Visitas registradas</div><div class="val num" id="kVis">–</div><div class="hint" id="kVisHint"></div></div>
       </div>
@@ -331,7 +333,7 @@ td.r,th.r{text-align:right}
               <div class="field"><label>Latitud</label><input type="number" step="any" name="lat" placeholder="-27.36"></div>
               <div class="field"><label>Longitud</label><input type="number" step="any" name="lng" placeholder="-55.89"></div>
             </div>
-            <div class="field"><label>Stock total de equipos</label><input type="number" id="stockTotal" min="0"></div>
+            <div class="field"><label>Plan total de equipos</label><input type="number" id="stockTotal" min="0"></div>
             <button class="btn btn-primary" type="submit">Guardar</button>
           </form>
         </div>
@@ -444,7 +446,9 @@ function renderDash(){
   $("#updated").textContent="Actualizado al "+fmtD(today())+" · datos en vivo";
   $("#kPct").textContent=Math.round(pct*100)+"%"; $("#kPctBar").style.width=(pct*100)+"%";
   $("#kPctHint").textContent=`${fmtN(rp)} filtros repuestos de ${fmtN(eq)}`;
-  $("#kEq").textContent=fmtN(eq); $("#kEqHint").textContent=`${s.length} localidades · stock disponible ${fmtN(D.stock-eq)}`;
+  $("#kEq").textContent=fmtN(eq); $("#kEqHint").textContent=`en ${s.length} localidades`;
+  $("#kDisp").textContent=fmtN(D.stock-eq); $("#kDispBar").style.width=(D.stock?Math.min(eq/D.stock,1)*100:0)+"%";
+  $("#kDispHint").textContent=D.stock?`de ${fmtN(D.stock)} del plan · ${Math.round(eq/D.stock*100)}% entregado`:"Cargá el plan en Carga de datos";
   $("#kPend").textContent=fmtN(pe); $("#kPendHint").textContent=`${s.filter(r=>r.repuestos===0).length} localidades sin ninguna reposición`;
   const vy=D.vis.length, last=D.vis[0];
   $("#kVis").textContent=fmtN(vy); $("#kVisHint").textContent= last? `Última: ${fmtD(last.fecha)} · ${D.locName[last.localidad_id]}`:"Sin visitas";
