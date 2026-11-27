@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Control y Seguimiento · Equipos y Reposiciones</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+:root{
+  --bg:#f3f6f8; --panel:#ffffff; --ink:#0d1b24; --muted:#5b6b76; --line:#e2e8ec;
+  --brand:#0b6e79; --brand-2:#0e8f9c; --brand-soft:#e3f3f4; --deep:#06343b;
+  --ok:#16a34a; --warn:#d59e00; --bad:#dc2626; --none:#94a3b8;
+  --radius:14px; --shadow:0 1px 2px rgba(13,27,36,.05),0 8px 24px rgba(13,27,36,.06);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:Manrope,system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;-webkit-font-smoothing:antialiased}
+.num{font-family:"JetBrains Mono",monospace;font-variant-numeric:tabular-nums}
+button,input,select,textarea{font:inherit;color:inherit}
+.hidden{display:none!important}
+
+
+#login{min-height:100%;display:grid;grid-template-columns:1.1fr 1fr}
+.login-hero{background:radial-gradient(1200px 600px at -10% 110%,#0e8f9c 0%,transparent 60%),linear-gradient(160deg,#06343b,#0b4f57);color:#e9f7f8;padding:56px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden}
+.login-hero h1{font-size:44px;line-height:1.05;letter-spacing:-.02em;margin:0 0 14px;font-weight:800;max-width:12ch}
+.login-hero p{color:#b9dfe2;max-width:42ch;line-height:1.55;margin:0}
+.drops{position:absolute;right:-60px;top:80px;opacity:.16}
+.hero-stats{display:flex;gap:36px}
+.hero-stats b{display:block;font-size:30px;font-family:"JetBrains Mono",monospace}
+.hero-stats span{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#9fd0d4}
+.login-box{display:flex;align-items:center;justify-content:center;padding:32px}
+.login-card{width:100%;max-width:380px}
+.login-card h2{margin:0 0 6px;font-size:24px}
+.login-card .sub{color:var(--muted);margin:0 0 26px}
+label{display:block;font-size:13px;font-weight:600;margin:0 0 6px;color:#2a3a44}
+.field{margin-bottom:16px}
+input,select,textarea{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:10px;background:#fff;outline:none;transition:border-color .15s,box-shadow .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--brand-2);box-shadow:0 0 0 3px rgba(14,143,156,.15)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:10px;padding:11px 18px;font-weight:700;cursor:pointer;transition:transform .08s,background .15s}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:var(--brand);color:#fff;width:100%}
+.btn-primary:hover{background:var(--deep)}
+.btn-ghost{background:transparent;color:var(--brand);padding:8px 10px}
+.btn-ghost:hover{background:var(--brand-soft)}
+.btn-sm{padding:7px 12px;font-size:13px;border-radius:8px}
+.btn-outline{background:#fff;border:1px solid var(--line);color:var(--ink)}
+.btn-outline:hover{border-color:var(--brand-2)}
+.msg{font-size:13px;margin-top:12px;min-height:18px}
+.msg.err{color:var(--bad)} .msg.ok{color:var(--ok)}
+
+
+#app{min-height:100%}
+header.top{background:var(--deep);color:#e9f7f8;position:sticky;top:0;z-index:1000}
+.top-in{max-width:1320px;margin:0 auto;display:flex;align-items:center;gap:22px;padding:0 24px;height:64px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.01em;white-space:nowrap}
+.logo small{display:block;font-weight:500;color:#9fd0d4;font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+nav.tabs{display:flex;gap:4px;flex:1;overflow-x:auto;scrollbar-width:none}
+nav.tabs button{background:transparent;border:0;color:#b9dfe2;padding:9px 14px;border-radius:9px;font-weight:600;cursor:pointer;white-space:nowrap}
+nav.tabs button:hover{color:#fff;background:rgba(255,255,255,.06)}
+nav.tabs button.on{color:#06343b;background:#cdeef0}
+.user{display:flex;align-items:center;gap:8px;font-size:13px;color:#b9dfe2;white-space:nowrap}
+.user button{background:rgba(255,255,255,.08);border:0;color:#e9f7f8;border-radius:8px;padding:7px 10px;cursor:pointer;font-size:13px}
+.user button:hover{background:rgba(255,255,255,.16)}
+main{max-width:1320px;margin:0 auto;padding:26px 24px 60px}
+.page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:20px;flex-wrap:wrap}
+.page-head h2{margin:0;font-size:26px;letter-spacing:-.02em}
+.page-head p{margin:4px 0 0;color:var(--muted)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.panel-h{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 0}
+.panel-h h3{margin:0;font-size:15px}
+.panel-b{padding:16px 18px 18px}
+
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+.kpi{padding:16px 18px;position:relative;overflow:hidden}
+.kpi .lbl{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.kpi .val{font-size:32px;font-weight:700;margin-top:6px;letter-spacing:-.02em}
+.kpi .hint{font-size:12.5px;color:var(--muted);margin-top:4px}
+.kpi.accent{background:linear-gradient(140deg,#0b6e79,#06343b);color:#fff;border:0}
+.kpi.accent .lbl,.kpi.accent .hint{color:#b9e4e7}
+.bar{height:6px;background:rgba(255,255,255,.2);border-radius:99px;margin-top:12px;overflow:hidden}
+.bar i{display:block;height:100%;background:#7fe3ea;border-radius:99px}
+
+.grid-2{display:grid;grid-template-columns:1.55fr 1fr;gap:14px;margin-bottom:14px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.chart-box{position:relative;height:300px}
+
+.sema{display:flex;gap:10px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:7px;padding:5px 11px 5px 9px;border-radius:99px;font-size:12.5px;font-weight:700;background:#eef2f4;color:#33434d;white-space:nowrap}
+.dot{width:9px;height:9px;border-radius:50%;flex:none}
+.chip.verde{background:#e6f6ec;color:#11692f} .chip.verde .dot{background:var(--ok)}
+.chip.amarillo{background:#fdf5d9;color:#7a5a00} .chip.amarillo .dot{background:var(--warn)}
+.chip.rojo{background:#fde8e8;color:#9b1c1c} .chip.rojo .dot{background:var(--bad);box-shadow:0 0 0 0 rgba(220,38,38,.5);animation:pulse 1.6s infinite}
+.chip.gris{background:#eef2f4;color:#4a5963} .chip.gris .dot{background:var(--none)}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(220,38,38,.45)}70%{box-shadow:0 0 0 7px rgba(220,38,38,0)}100%{box-shadow:0 0 0 0 rgba(220,38,38,0)}}
+
+.alerts{display:flex;flex-direction:column;gap:8px}
+.alert{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:11px;border:1px solid var(--line)}
+.alert .t{flex:1;min-width:0}
+.alert .t b{display:block;font-size:14px}
+.alert .t span{font-size:12.5px;color:var(--muted)}
+.alert .d{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:13px;text-align:right}
+.alert.rojo{border-color:#f6caca;background:#fff7f7}
+.alert.amarillo{border-color:#f3e2a6;background:#fffcf0}
+.empty{color:var(--muted);font-size:14px;padding:12px 0}
+
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap;background:#fafcfd;position:sticky;top:0}
+td{padding:12px;border-bottom:1px solid #eef2f4;vertical-align:middle}
+tr:hover td{background:#fafcfd}
+td.r,th.r{text-align:right}
+.tbl-wrap{overflow:auto;border-radius:0 0 var(--radius) var(--radius)}
+.prog{display:flex;align-items:center;gap:8px;min-width:120px}
+.prog .track{flex:1;height:7px;background:#e8eef1;border-radius:99px;overflow:hidden}
+.prog .track i{display:block;height:100%;background:var(--brand-2);border-radius:99px}
+.prog span{font-size:12px;width:38px;text-align:right}
+.search{max-width:260px}
+
+#map{height:calc(100vh - 230px);min-height:460px;border-radius:var(--radius)}
+.map-wrap{position:relative}
+.legend{position:absolute;z-index:500;left:14px;bottom:14px;background:#fff;border-radius:12px;padding:10px 12px;box-shadow:var(--shadow);font-size:12.5px;display:flex;flex-direction:column;gap:6px}
+.legend div{display:flex;align-items:center;gap:8px}
+.leaflet-popup-content{font-family:Manrope,sans-serif;margin:14px 16px}
+.pop h4{margin:0 0 8px;font-size:15px}
+.pop .row{display:flex;justify-content:space-between;gap:18px;font-size:13px;padding:2px 0}
+.pop .row span{color:var(--muted)}
+
+.forms{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mini-list{max-height:330px;overflow:auto}
+.mini-list table td{padding:9px 10px;font-size:13.5px}
+.del{background:transparent;border:0;color:#a3b1b9;cursor:pointer;font-size:16px;padding:2px 6px;border-radius:6px}
+.del:hover{color:var(--bad);background:#fde8e8}
+.tag{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--brand);background:var(--brand-soft);padding:3px 8px;border-radius:6px}
+
+.timeline{position:relative;padding-left:22px}
+.timeline:before{content:"";position:absolute;left:6px;top:4px;bottom:4px;width:2px;background:var(--line)}
+.tl{position:relative;padding:0 0 18px}
+.tl:before{content:"";position:absolute;left:-21px;top:5px;width:12px;height:12px;border-radius:50%;background:#fff;border:3px solid var(--brand-2)}
+.tl .when{font-size:12px;color:var(--muted);font-weight:600}
+.tl .where{font-weight:700;margin:2px 0}
+.tl .obs{font-size:13.5px;color:#33434d}
+.tl-head{display:flex;justify-content:space-between;gap:8px}
+
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:12px 18px;border-radius:12px;font-weight:600;font-size:14px;opacity:0;transition:.25s;z-index:3000;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.loader{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg);z-index:4000}
+.spin{width:34px;height:34px;border:3px solid #cfe3e6;border-top-color:var(--brand);border-radius:50%;animation:sp 0.8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.modal-bg{position:fixed;inset:0;background:rgba(6,52,59,.45);display:flex;align-items:center;justify-content:center;z-index:3500;padding:20px}
+.modal{background:#fff;border-radius:16px;padding:22px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.modal h3{margin:0 0 14px}
+
+@media (max-width:1050px){
+  .kpis{grid-template-columns:repeat(2,1fr)} .grid-2,.grid-3,.forms{grid-template-columns:1fr}
+  #login{grid-template-columns:1fr} .login-hero{padding:36px 28px;min-height:300px} .login-hero h1{font-size:34px}
+}
+@media (max-width:640px){
+  .top-in{flex-wrap:wrap;height:auto;padding:10px 14px;gap:10px} nav.tabs{order:3;width:100%;flex:auto}
+  .user .em{display:none} main{padding:18px 14px 50px} .kpi .val{font-size:26px} .hero-stats{gap:22px}
+}
+</style>
+</head>
+<body>
+
+<div class="loader" id="loader"><div class="spin"></div></div>
+
+<!-- LOGIN -->
+<section id="login" class="hidden">
+  <div class="login-hero">
+    <svg class="drops" width="420" height="520" viewBox="0 0 420 520" fill="none"><path d="M210 20C210 20 60 200 60 320a150 150 0 0 0 300 0C360 200 210 20 210 20Z" stroke="#fff" stroke-width="14"/><path d="M210 120C210 120 120 230 120 310a90 90 0 0 0 180 0c0-80-90-190-90-190Z" stroke="#fff" stroke-width="10"/></svg>
+    <div>
+      <div class="logo" style="margin-bottom:56px"><svg width="30" height="30" viewBox="0 0 24 24" fill="none"><path d="M12 2s-7 8.2-7 13a7 7 0 0 0 14 0c0-4.8-7-13-7-13Z" fill="#7fe3ea"/></svg><div>Control y Seguimiento<small>Equipos · Filtros · Visitas</small></div></div>
+      <h1>Equipos, filtros y visitas en un solo lugar.</h1>
+      <p>Seguimiento en línea de equipos entregados por localidad, reposición de filtros y pastillas, y registro de visitas en territorio.</p>
+    </div>
+    <div class="hero-stats">
+      <div><b>Misiones</b><span>Cobertura</span></div>
+      <div><b>3 meses</b><span>Vida del filtro</span></div>
+      <div><b>En vivo</b><span>Semáforo</span></div>
+    </div>
+  </div>
+  <div class="login-box">
+    <form class="login-card" id="loginForm">
+      <h2>Ingresar</h2>
+      <p class="sub">Acceso solo para usuarios autorizados.</p>
+      <div class="field"><label for="lEmail">Email</label><input id="lEmail" type="email" autocomplete="email" required></div>
+      <div class="field"><label for="lPass">Contraseña</label><input id="lPass" type="password" autocomplete="current-password"></div>
+      <button class="btn btn-primary" type="submit" id="lBtn">Ingresar</button>
+      <div style="display:flex;justify-content:center;margin-top:10px">
+        <button class="btn btn-ghost" type="button" id="magicBtn">¿Primera vez u olvidaste la contraseña? Recibir link por email</button>
+      </div>
+      <div class="msg" id="lMsg"></div>
+    </form>
+  </div>
+</section>
+
+<!-- APP -->
+<section id="app" class="hidden">
+  <header class="top"><div class="top-in">
+    <div class="logo"><svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M12 2s-7 8.2-7 13a7 7 0 0 0 14 0c0-4.8-7-13-7-13Z" fill="#7fe3ea"/></svg><div>Control y Seguimiento<small>Equipos · Filtros · Visitas</small></div></div>
+    <nav class="tabs" id="tabs">
+      <button data-v="dash" class="on">Dashboard</button>
+      <button data-v="mapa">Mapa</button>
+      <button data-v="seg">Seguimiento</button>
+      <button data-v="vis">Visitas</button>
+      <button data-v="carga">Carga de datos</button>
+    </nav>
+    <div class="user"><span class="em" id="uEmail"></span><button id="passBtn" title="Cambiar contraseña">🔑</button><button id="outBtn">Salir</button></div>
+  </div></header>
+
+  <main>
+    <!-- DASHBOARD -->
+    <div data-view="dash">
+      <div class="page-head">
+        <div><h2>Resumen general</h2><p id="updated"></p></div>
+        <button class="btn btn-outline btn-sm" id="xlsBtn">⬇ Descargar Excel</button>
+      </div>
+      <div class="kpis">
+        <div class="panel kpi accent"><div class="lbl">Cobertura de reposición</div><div class="val num" id="kPct">–</div><div class="bar"><i id="kPctBar" style="width:0"></i></div><div class="hint" id="kPctHint"></div></div>
+        <div class="panel kpi"><div class="lbl">Equipos entregados</div><div class="val num" id="kEq">–</div><div class="hint" id="kEqHint"></div></div>
+        <div class="panel kpi"><div class="lbl">Pendiente de reponer</div><div class="val num" id="kPend">–</div><div class="hint" id="kPendHint"></div></div>
+        <div class="panel kpi"><div class="lbl">Visitas registradas</div><div class="val num" id="kVis">–</div><div class="hint" id="kVisHint"></div></div>
+      </div>
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-h"><h3>Equipos vs. filtros repuestos por localidad</h3></div>
+          <div class="panel-b"><div class="chart-box"><canvas id="chBar"></canvas></div></div>
+        </div>
+        <div class="panel">
+          <div class="panel-h"><h3>Alertas de reposición</h3><div class="sema" id="semaCount"></div></div>
+          <div class="panel-b"><div class="alerts" id="alerts"></div></div>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-h"><h3>Visitas por mes</h3></div>
+          <div class="panel-b"><div class="chart-box" style="height:230px"><canvas id="chVis"></canvas></div></div>
+        </div>
+        <div class="panel">
+          <div class="panel-h"><h3>Estado del semáforo</h3></div>
+          <div class="panel-b"><div class="chart-box" style="height:230px"><canvas id="chDon"></canvas></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAPA -->
+    <div data-view="mapa" class="hidden">
+      <div class="page-head"><div><h2>Mapa de localidades</h2><p>El color indica el estado de vencimiento del filtro. El tamaño, la cantidad de equipos.</p></div></div>
+      <div class="panel map-wrap">
+        <div id="map"></div>
+        <div class="legend">
+          <div><span class="dot" style="background:var(--ok)"></span>Al día (+7 días)</div>
+          <div><span class="dot" style="background:var(--warn)"></span>Vence esta semana</div>
+          <div><span class="dot" style="background:var(--bad)"></span>Vencido</div>
+          <div><span class="dot" style="background:var(--none)"></span>Sin equipos / sin fecha</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEGUIMIENTO -->
+    <div data-view="seg" class="hidden">
+      <div class="page-head">
+        <div><h2>Seguimiento por localidad</h2><p>El filtro vence 3 meses después de la última reposición (o de la entrega efectiva si todavía no hubo reposición).</p></div>
+        <input class="search" id="segSearch" placeholder="Buscar localidad…">
+      </div>
+      <div class="panel"><div class="tbl-wrap"><table>
+        <thead><tr><th>Localidad</th><th>Estado</th><th class="r">Equipos</th><th class="r">Repuestos</th><th class="r">Pendiente</th><th>% cubierto</th><th>Entrega</th><th>Entrega efectiva</th><th>Últ. reposición</th><th>Vence</th><th class="r">Días</th></tr></thead>
+        <tbody id="segBody"></tbody>
+      </table></div></div>
+    </div>
+
+    <!-- VISITAS -->
+    <div data-view="vis" class="hidden">
+      <div class="page-head"><div><h2>Visitas a localidades</h2><p>Entrevistas, capacitaciones y entregas en territorio.</p></div></div>
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-h"><h3>Historial</h3><select id="visFilter" style="width:auto;padding:7px 10px;font-size:13px"></select></div>
+          <div class="panel-b"><div class="timeline" id="timeline"></div></div>
+        </div>
+        <div class="panel" style="align-self:start">
+          <div class="panel-h"><h3>Registrar visita</h3></div>
+          <form class="panel-b" id="fVis">
+            <div class="field"><label>Fecha</label><input type="date" name="fecha" required></div>
+            <div class="field"><label>Localidad</label><select name="localidad_id" class="selLoc" required></select></div>
+            <div class="field"><label>Observaciones</label><textarea name="observaciones" rows="4" placeholder="Ej: capacitación en escuela, entrega de kits…"></textarea></div>
+            <button class="btn btn-primary" type="submit">Guardar visita</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARGA -->
+    <div data-view="carga" class="hidden">
+      <div class="page-head"><div><h2>Carga de datos</h2><p>Todo lo que cargues acá se refleja al instante en el dashboard, el mapa y el seguimiento.</p></div></div>
+      <div class="forms">
+        <div class="panel">
+          <div class="panel-h"><h3>Equipos entregados</h3><span class="tag">Entrega</span></div>
+          <form class="panel-b" id="fEnt">
+            <div class="field"><label>Localidad</label><select name="localidad_id" class="selLoc" required></select></div>
+            <div class="form-row">
+              <div class="field"><label>Fecha entrega</label><input type="date" name="fecha_entrega" required></div>
+              <div class="field"><label>Cantidad</label><input type="number" name="cantidad" min="1" required></div>
+            </div>
+            <div class="field"><label>Entrega efectiva al usuario final</label><input type="date" name="entrega_efectiva"></div>
+            <button class="btn btn-primary" type="submit">Guardar entrega</button>
+          </form>
+        </div>
+        <div class="panel">
+          <div class="panel-h"><h3>Reposición de filtros y pastillas</h3><span class="tag">Reposición</span></div>
+          <form class="panel-b" id="fRep">
+            <div class="field"><label>Localidad</label><select name="localidad_id" class="selLoc" required></select></div>
+            <div class="form-row">
+              <div class="field"><label>Fecha</label><input type="date" name="fecha" required></div>
+              <div class="field"><label>Cantidad</label><input type="number" name="cantidad" min="1" required></div>
+            </div>
+            <div class="field"><label>Observaciones</label><input name="observaciones"></div>
+            <button class="btn btn-primary" type="submit">Guardar reposición</button>
+          </form>
+        </div>
+        <div class="panel">
+          <div class="panel-h"><h3>Nueva localidad</h3><span class="tag">Maestro</span></div>
+          <form class="panel-b" id="fLoc">
+            <div class="field"><label>Nombre</label><input name="nombre" required></div>
+            <div class="form-row">
+              <div class="field"><label>Latitud</label><input type="number" step="any" name="lat" placeholder="-27.36"></div>
+              <div class="field"><label>Longitud</label><input type="number" step="any" name="lng" placeholder="-55.89"></div>
+            </div>
+            <div class="field"><label>Stock total de equipos</label><input type="number" id="stockTotal" min="0"></div>
+            <button class="btn btn-primary" type="submit">Guardar</button>
+          </form>
+        </div>
+      </div>
+      <div class="grid-3">
+        <div class="panel"><div class="panel-h"><h3>Entregas cargadas</h3></div><div class="panel-b mini-list"><table><tbody id="lEnt"></tbody></table></div></div>
+        <div class="panel"><div class="panel-h"><h3>Reposiciones cargadas</h3></div><div class="panel-b mini-list"><table><tbody id="lRep"></tbody></table></div></div>
+        <div class="panel"><div class="panel-h"><h3>Visitas cargadas</h3></div><div class="panel-b mini-list"><table><tbody id="lVis"></tbody></table></div></div>
+      </div>
+    </div>
+  </main>
+</section>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPABASE_URL = "https://lxiqofqikkxoyssdabrs.supabase.co";
+const SUPABASE_KEY = "sb_publishable_7qTJ-YugXFXcNahAuVg90g_zzEvICpU";
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+Chart.defaults.font.family = "Manrope, system-ui, sans-serif";
+
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmtN = n => (n ?? 0).toLocaleString("es-AR");
+const fmtD = d => d ? new Date(d + "T00:00:00").toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit",year:"numeric"}) : "–";
+const today = () => new Date(Date.now() - new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
+const SEMA = {verde:{c:"#16a34a",t:"Al día"},amarillo:{c:"#d59e00",t:"Vence esta semana"},rojo:{c:"#dc2626",t:"Vencido"},sin_fecha:{c:"#94a3b8",t:"Sin fecha"},sin_equipos:{c:"#94a3b8",t:"Sin equipos"}};
+const chipCls = s => s==="verde"||s==="amarillo"||s==="rojo" ? s : "gris";
+
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("show"),2600)}
+
+let D = {seg:[],loc:[],ent:[],rep:[],vis:[],stock:0};
+let charts = {}, map, layer;
+
+
+async function boot(){
+  const {data:{session}} = await sb.auth.getSession();
+  $("#loader").classList.add("hidden");
+  if(session) enter(session); else showLogin();
+}
+function showLogin(){ $("#app").classList.add("hidden"); $("#login").classList.remove("hidden"); }
+async function enter(session){
+  const email = session.user.email;
+  const {data,error} = await sb.from("ctl_usuarios").select("email").maybeSingle();
+  if(error || !data){
+    await sb.auth.signOut(); showLogin();
+    const m=$("#lMsg"); m.className="msg err"; m.textContent=`El email ${email} no está autorizado. Pedile acceso al administrador.`; return;
+  }
+  $("#uEmail").textContent = email;
+  $("#login").classList.add("hidden"); $("#app").classList.remove("hidden");
+  await loadAll();
+}
+$("#loginForm").addEventListener("submit", async e=>{
+  e.preventDefault();
+  const m=$("#lMsg"), email=$("#lEmail").value.trim(), password=$("#lPass").value;
+  if(!password){m.className="msg err";m.textContent="Escribí tu contraseña o pedí el link por email.";return}
+  $("#lBtn").disabled=true; m.className="msg"; m.textContent="Ingresando…";
+  const {data,error} = await sb.auth.signInWithPassword({email,password});
+  $("#lBtn").disabled=false;
+  if(error){m.className="msg err";m.textContent="Email o contraseña incorrectos.";return}
+  m.textContent=""; enter(data.session);
+});
+$("#magicBtn").addEventListener("click", async ()=>{
+  const m=$("#lMsg"), email=$("#lEmail").value.trim();
+  if(!email){m.className="msg err";m.textContent="Escribí tu email primero.";return}
+  m.className="msg"; m.textContent="Enviando…";
+  const {error} = await sb.auth.signInWithOtp({email, options:{emailRedirectTo: location.origin + location.pathname}});
+  if(error){m.className="msg err";m.textContent="No se pudo enviar el link: "+error.message;return}
+  m.className="msg ok"; m.textContent="Listo. Revisá tu correo y abrí el link para entrar. Después podés crear una contraseña con 🔑.";
+});
+$("#outBtn").addEventListener("click", async ()=>{ await sb.auth.signOut(); location.reload(); });
+$("#passBtn").addEventListener("click", ()=>{
+  const bg=document.createElement("div"); bg.className="modal-bg";
+  bg.innerHTML=`<form class="modal"><h3>Crear / cambiar contraseña</h3><div class="field"><label>Nueva contraseña (mín. 8)</label><input type="password" minlength="8" required></div><div style="display:flex;gap:8px"><button class="btn btn-outline" type="button">Cancelar</button><button class="btn btn-primary" type="submit">Guardar</button></div><div class="msg"></div></form>`;
+  document.body.appendChild(bg);
+  bg.querySelector(".btn-outline").onclick=()=>bg.remove();
+  bg.querySelector("form").onsubmit=async ev=>{
+    ev.preventDefault();
+    const {error}=await sb.auth.updateUser({password:bg.querySelector("input").value});
+    if(error){const m=bg.querySelector(".msg");m.className="msg err";m.textContent=error.message;return}
+    bg.remove(); toast("Contraseña guardada ✓");
+  };
+});
+sb.auth.onAuthStateChange((ev,session)=>{ if(ev==="SIGNED_IN" && session && $("#app").classList.contains("hidden") && location.hash.includes("access_token")){ history.replaceState(null,"",location.pathname); enter(session);} });
+
+
+async function loadAll(){
+  const [seg,loc,ent,rep,vis,cfg] = await Promise.all([
+    sb.from("ctl_seguimiento").select("*").order("nombre"),
+    sb.from("ctl_localidades").select("*").order("nombre"),
+    sb.from("ctl_entregas").select("*").order("fecha_entrega",{ascending:false}),
+    sb.from("ctl_reposiciones").select("*").order("fecha",{ascending:false}),
+    sb.from("ctl_visitas").select("*").order("fecha",{ascending:false}),
+    sb.from("ctl_config").select("*").eq("clave","stock_total").maybeSingle()
+  ]);
+  const err=[seg,loc,ent,rep,vis,cfg].find(r=>r.error);
+  if(err){toast("Error al cargar datos: "+err.error.message);return}
+  D={seg:seg.data,loc:loc.data,ent:ent.data,rep:rep.data,vis:vis.data,stock:Number(cfg.data?.valor||0)};
+  D.locName=Object.fromEntries(D.loc.map(l=>[l.id,l.nombre]));
+  renderAll();
+}
+function renderAll(){ renderDash(); renderSeg(); renderVis(); renderCarga(); fillSelects(); if(map) renderMap(); }
+
+
+function renderDash(){
+  const s=D.seg.filter(r=>r.equipos>0);
+  const eq=s.reduce((a,r)=>a+r.equipos,0), rp=s.reduce((a,r)=>a+r.repuestos,0), pe=s.reduce((a,r)=>a+r.pendiente,0);
+  const pct= eq? Math.min(rp/eq,1):0;
+  $("#updated").textContent="Actualizado al "+fmtD(today())+" · datos en vivo";
+  $("#kPct").textContent=Math.round(pct*100)+"%"; $("#kPctBar").style.width=(pct*100)+"%";
+  $("#kPctHint").textContent=`${fmtN(rp)} filtros repuestos de ${fmtN(eq)}`;
+  $("#kEq").textContent=fmtN(eq); $("#kEqHint").textContent=`${s.length} localidades · stock disponible ${fmtN(D.stock-eq)}`;
+  $("#kPend").textContent=fmtN(pe); $("#kPendHint").textContent=`${s.filter(r=>r.repuestos===0).length} localidades sin ninguna reposición`;
+  const vy=D.vis.length, last=D.vis[0];
+  $("#kVis").textContent=fmtN(vy); $("#kVisHint").textContent= last? `Última: ${fmtD(last.fecha)} · ${D.locName[last.localidad_id]}`:"Sin visitas";
+
+  const cnt={rojo:0,amarillo:0,verde:0}; s.forEach(r=>{if(cnt[r.semaforo]!=null)cnt[r.semaforo]++});
+  $("#semaCount").innerHTML=["rojo","amarillo","verde"].map(k=>`<span class="chip ${k}"><span class="dot"></span>${cnt[k]}</span>`).join("");
+  const al=s.filter(r=>r.semaforo==="rojo"||r.semaforo==="amarillo").sort((a,b)=>a.dias_restantes-b.dias_restantes);
+  const prox=s.filter(r=>r.semaforo==="verde").sort((a,b)=>a.dias_restantes-b.dias_restantes).slice(0,Math.max(0,5-al.length));
+  $("#alerts").innerHTML = al.concat(prox).map(r=>{
+    const d=r.dias_restantes, txt=d<0?`Venció hace ${-d} d`:d===0?"Vence hoy":`Faltan ${d} d`;
+    return `<div class="alert ${r.semaforo}"><span class="dot" style="background:${SEMA[r.semaforo].c};width:11px;height:11px"></span><div class="t"><b>${esc(r.nombre)}</b><span>${fmtN(r.equipos)} equipos · vence ${fmtD(r.vencimiento)}</span></div><div class="d" style="color:${SEMA[r.semaforo].c}">${txt}</div></div>`;
+  }).join("") || `<div class="empty">Sin alertas 🎉</div>`;
+
+  const ord=[...s].sort((a,b)=>b.equipos-a.equipos);
+  drawChart("chBar",{type:"bar",data:{labels:ord.map(r=>r.nombre),datasets:[
+      {label:"Equipos entregados",data:ord.map(r=>r.equipos),backgroundColor:"#0b6e79",borderRadius:6,barPercentage:.75,categoryPercentage:.7},
+      {label:"Filtros repuestos",data:ord.map(r=>r.repuestos),backgroundColor:"#7fd3da",borderRadius:6,barPercentage:.75,categoryPercentage:.7}]},
+    options:baseOpts({scales:{x:{grid:{display:false},ticks:{autoSkip:false,maxRotation:40,font:{size:11}}},y:{grid:{color:"#eef2f4"},border:{display:false}}}})});
+
+  const months={}; D.vis.forEach(v=>{const k=v.fecha.slice(0,7);months[k]=(months[k]||0)+1});
+  const keys=Object.keys(months).sort(); const mlab=keys.map(k=>{const [y,m]=k.split("-");return new Date(y,m-1,1).toLocaleDateString("es-AR",{month:"short",year:"2-digit"})});
+  drawChart("chVis",{type:"line",data:{labels:mlab,datasets:[{label:"Visitas",data:keys.map(k=>months[k]),borderColor:"#0e8f9c",backgroundColor:"rgba(14,143,156,.12)",fill:true,tension:.35,pointRadius:4,pointBackgroundColor:"#fff",pointBorderWidth:2}]},
+    options:baseOpts({plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{beginAtZero:true,ticks:{precision:0},grid:{color:"#eef2f4"},border:{display:false}}}})});
+
+  drawChart("chDon",{type:"doughnut",data:{labels:["Vencido","Vence esta semana","Al día"],datasets:[{data:[cnt.rojo,cnt.amarillo,cnt.verde],backgroundColor:["#dc2626","#e0a800","#16a34a"],borderWidth:3,borderColor:"#fff"}]},
+    options:baseOpts({cutout:"68%",plugins:{legend:{position:"right"}}})});
+}
+function baseOpts(o){
+  const legend={position:"top",align:"end",labels:{usePointStyle:true,boxWidth:8,font:{family:"Manrope",weight:"600"}}};
+  const tooltip={backgroundColor:"#0d1b24",padding:10,titleFont:{family:"Manrope"},bodyFont:{family:"Manrope"}};
+  const plugins=Object.assign({legend,tooltip},o.plugins||{});
+  if(o.plugins&&o.plugins.legend) plugins.legend=Object.assign({},legend,o.plugins.legend);
+  return Object.assign({responsive:true,maintainAspectRatio:false},o,{plugins});
+}
+function drawChart(id,cfg){ charts[id]?.destroy(); charts[id]=new Chart(document.getElementById(id),cfg); }
+
+
+function initMap(){
+  map=L.map("map",{zoomControl:true}).setView([-27.2,-55.1],8);
+  L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",{attribution:'&copy; OpenStreetMap &copy; CARTO',maxZoom:18}).addTo(map);
+  layer=L.layerGroup().addTo(map); renderMap();
+}
+function renderMap(){
+  layer.clearLayers(); const pts=[];
+  D.seg.filter(r=>r.lat!=null&&r.lng!=null).forEach(r=>{
+    const c=SEMA[r.semaforo].c, rad=r.equipos?Math.max(9,Math.min(30,Math.sqrt(r.equipos)*1.3)):7;
+    const mk=L.circleMarker([r.lat,r.lng],{radius:rad,color:"#fff",weight:2.5,fillColor:c,fillOpacity:.9}).addTo(layer);
+    mk.bindTooltip(esc(r.nombre),{direction:"top",offset:[0,-rad]});
+    mk.bindPopup(`<div class="pop"><h4>${esc(r.nombre)}</h4>
+      <div style="margin-bottom:8px"><span class="chip ${chipCls(r.semaforo)}"><span class="dot"></span>${SEMA[r.semaforo].t}</span></div>
+      <div class="row"><span>Equipos</span><b class="num">${fmtN(r.equipos)}</b></div>
+      <div class="row"><span>Filtros repuestos</span><b class="num">${fmtN(r.repuestos)}</b></div>
+      <div class="row"><span>Pendiente</span><b class="num">${fmtN(r.pendiente)}</b></div>
+      <div class="row"><span>Vence</span><b>${fmtD(r.vencimiento)}</b></div>
+      <div class="row"><span>Visitas</span><b class="num">${r.visitas}</b></div></div>`);
+    pts.push([r.lat,r.lng]);
+  });
+  if(pts.length) map.fitBounds(pts,{padding:[40,40]});
+}
+
+
+function renderSeg(){
+  const q=($("#segSearch").value||"").toLowerCase();
+  const rows=D.seg.filter(r=>r.nombre.toLowerCase().includes(q)).sort((a,b)=>(a.dias_restantes??9999)-(b.dias_restantes??9999));
+  $("#segBody").innerHTML=rows.map(r=>`<tr>
+    <td><b>${esc(r.nombre)}</b></td>
+    <td><span class="chip ${chipCls(r.semaforo)}"><span class="dot"></span>${SEMA[r.semaforo].t}</span></td>
+    <td class="r num">${fmtN(r.equipos)}</td><td class="r num">${fmtN(r.repuestos)}</td><td class="r num">${fmtN(r.pendiente)}</td>
+    <td><div class="prog"><div class="track"><i style="width:${Math.round(r.pct_cubierto*100)}%"></i></div><span class="num">${Math.round(r.pct_cubierto*100)}%</span></div></td>
+    <td>${fmtD(r.fecha_entrega)}</td><td>${fmtD(r.entrega_efectiva)}</td><td>${fmtD(r.ultima_reposicion)}</td><td>${fmtD(r.vencimiento)}</td>
+    <td class="r num" style="color:${SEMA[r.semaforo].c};font-weight:700">${r.dias_restantes??"–"}</td></tr>`).join("");
+}
+$("#segSearch").addEventListener("input",renderSeg);
+
+
+function renderVis(){
+  const f=$("#visFilter").value;
+  const list=D.vis.filter(v=>!f||String(v.localidad_id)===f);
+  $("#timeline").innerHTML=list.map(v=>`<div class="tl"><div class="tl-head"><div class="when">${fmtD(v.fecha)}</div></div><div class="where">${esc(D.locName[v.localidad_id])}</div>${v.observaciones?`<div class="obs">${esc(v.observaciones)}</div>`:""}</div>`).join("")||`<div class="empty">Sin visitas.</div>`;
+}
+$("#visFilter").addEventListener("change",renderVis);
+
+
+function fillSelects(){
+  const opts=D.loc.map(l=>`<option value="${l.id}">${esc(l.nombre)}</option>`).join("");
+  $$(".selLoc").forEach(s=>{const v=s.value;s.innerHTML=`<option value="">Elegí…</option>`+opts;s.value=v});
+  const vf=$("#visFilter"),cur=vf.value; vf.innerHTML=`<option value="">Todas las localidades</option>`+opts; vf.value=cur;
+  $("#stockTotal").value=D.stock||"";
+}
+function renderCarga(){
+  const row=(t,id,a,b,c)=>`<tr><td>${a}</td><td><b>${b}</b></td><td class="r num">${c}</td><td class="r"><button class="del" title="Borrar" data-t="${t}" data-id="${id}">✕</button></td></tr>`;
+  $("#lEnt").innerHTML=D.ent.map(e=>row("ctl_entregas",e.id,fmtD(e.fecha_entrega),esc(D.locName[e.localidad_id]),fmtN(e.cantidad))).join("")||`<tr><td class="empty">Vacío</td></tr>`;
+  $("#lRep").innerHTML=D.rep.map(e=>row("ctl_reposiciones",e.id,fmtD(e.fecha),esc(D.locName[e.localidad_id]),fmtN(e.cantidad))).join("")||`<tr><td class="empty">Vacío</td></tr>`;
+  $("#lVis").innerHTML=D.vis.map(e=>row("ctl_visitas",e.id,fmtD(e.fecha),esc(D.locName[e.localidad_id]),"")).join("")||`<tr><td class="empty">Vacío</td></tr>`;
+}
+document.addEventListener("click",async e=>{
+  const b=e.target.closest(".del"); if(!b) return;
+  if(!confirm("¿Borrar este registro?")) return;
+  const {error}=await sb.from(b.dataset.t).delete().eq("id",b.dataset.id);
+  if(error) return toast("No se pudo borrar: "+error.message);
+  toast("Registro borrado"); loadAll();
+});
+function formData(f){const o={};new FormData(f).forEach((v,k)=>{o[k]=v===""?null:v});return o}
+async function save(form,table,mapFn,okMsg){
+  const btn=form.querySelector("button[type=submit]"); btn.disabled=true;
+  const {error}=await sb.from(table).insert(mapFn(formData(form)));
+  btn.disabled=false;
+  if(error) return toast("Error: "+error.message);
+  form.reset(); setDefaults(); toast(okMsg); loadAll();
+}
+$("#fEnt").addEventListener("submit",e=>{e.preventDefault();save(e.target,"ctl_entregas",o=>({...o,localidad_id:+o.localidad_id,cantidad:+o.cantidad}),"Entrega guardada ✓")});
+$("#fRep").addEventListener("submit",e=>{e.preventDefault();save(e.target,"ctl_reposiciones",o=>({...o,localidad_id:+o.localidad_id,cantidad:+o.cantidad}),"Reposición guardada ✓")});
+$("#fVis").addEventListener("submit",e=>{e.preventDefault();save(e.target,"ctl_visitas",o=>({...o,localidad_id:+o.localidad_id}),"Visita guardada ✓")});
+$("#fLoc").addEventListener("submit",async e=>{
+  e.preventDefault(); const o=formData(e.target), st=$("#stockTotal").value;
+  if(st!=="" && Number(st)!==D.stock){
+    const {error}=await sb.from("ctl_config").upsert({clave:"stock_total",valor:Number(st)});
+    if(error) return toast("Error en stock: "+error.message);
+  }
+  if(o.nombre){
+    const {error}=await sb.from("ctl_localidades").insert({nombre:o.nombre.trim(),lat:o.lat?+o.lat:null,lng:o.lng?+o.lng:null});
+    if(error) return toast(error.code==="23505"?"Esa localidad ya existe":"Error: "+error.message);
+  }
+  e.target.reset(); toast("Guardado ✓"); loadAll();
+});
+$("#fLoc [name=nombre]").removeAttribute("required");
+function setDefaults(){ $$("input[type=date][name=fecha],input[type=date][name=fecha_entrega]").forEach(i=>{if(!i.value)i.value=today()}); }
+
+
+$("#xlsBtn").addEventListener("click",()=>{
+  const wb=XLSX.utils.book_new();
+  const seg=D.seg.map(r=>({Localidad:r.nombre,Estado:SEMA[r.semaforo].t,Equipos:r.equipos,"Filtros repuestos":r.repuestos,Pendiente:r.pendiente,"% cubierto":Math.round(r.pct_cubierto*100)/100,"Fecha entrega":r.fecha_entrega,"Entrega efectiva":r.entrega_efectiva,"Última reposición":r.ultima_reposicion,Vence:r.vencimiento,"Días restantes":r.dias_restantes,Visitas:r.visitas}));
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(seg),"Seguimiento");
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(D.ent.map(e=>({Fecha:e.fecha_entrega,Localidad:D.locName[e.localidad_id],Equipos:e.cantidad,"Entrega efectiva":e.entrega_efectiva}))),"Entregas");
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(D.rep.map(e=>({Fecha:e.fecha,Localidad:D.locName[e.localidad_id],Cantidad:e.cantidad,Observaciones:e.observaciones}))),"Reposiciones");
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(D.vis.map(e=>({Fecha:e.fecha,Localidad:D.locName[e.localidad_id],Observaciones:e.observaciones}))),"Visitas");
+  XLSX.writeFile(wb,`Control_y_Seguimiento_${today()}.xlsx`);
+});
+
+
+$("#tabs").addEventListener("click",e=>{
+  const b=e.target.closest("button"); if(!b) return;
+  $$("#tabs button").forEach(x=>x.classList.toggle("on",x===b));
+  $$("[data-view]").forEach(v=>v.classList.toggle("hidden",v.dataset.view!==b.dataset.v));
+  if(b.dataset.v==="mapa"){ if(!map) initMap(); else setTimeout(()=>map.invalidateSize(),50); }
+  window.scrollTo({top:0});
+});
+
+setDefaults();
+boot();
+</script>
+</body>
+</html>
