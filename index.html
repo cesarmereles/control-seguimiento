@@ -6,11 +6,11 @@
 <title>Control y Seguimiento · Equipos y Reposiciones</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha384-sHL9NAb7lN7rfvG5lfHpm643Xkcjzp4jFvuavGOndn6pjVqS6ny56CAt3nsEVT4H" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.2/dist/umd/supabase.js" integrity="sha384-A97u3Qnt9GZHURO9YJZRe7VQgGUeFzcv6I1oIGnUTxQrCxnpQMwR0/G8F2zt9abZ" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js" integrity="sha384-dug+JxfBvklEQdJ4AYuBBAIScUz0bVN73xpy273gcAwHjb3qI0fXmuYNaNfdyYJG" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" integrity="sha384-vtjasyidUo0kW94K5MXDXntzOJpQgBKXmE7e2Ga4LG0skTTLeBi97eFAXsqewJjw" crossorigin="anonymous"></script>
 <style>
 :root{
   --bg:#f3f6f8; --panel:#ffffff; --ink:#0d1b24; --muted:#5b6b76; --line:#e2e8ec;
@@ -427,6 +427,10 @@ td.r,th.r{text-align:right}
           <button class="btn btn-primary" type="submit" style="width:auto">Agregar</button>
         </form>
       </div>
+      <div class="panel" style="margin-top:14px">
+        <div class="panel-h"><h3>Historial de cambios</h3><span class="tag">Últimos 100</span></div>
+        <div class="panel-b mini-list" style="max-height:420px"><table class="ut"><thead><tr><th>Fecha</th><th>Usuario</th><th>Acción</th><th>Qué</th><th>Detalle</th></tr></thead><tbody id="aBody"></tbody></table></div>
+      </div>
     </div>
   </main>
   <footer class="dev"><img class="dev-logo" alt="CM"><span>Desarrollado por <b>César A. Mereles</b></span><i>·</i><a href="mailto:cesarmereles@gmail.com">Email</a><i>·</i><a href="https://wa.me/5493764737263" target="_blank" rel="noopener">WhatsApp</a></footer>
@@ -700,12 +704,26 @@ const SECS=[["dash","Dashboard"],["mapa","Mapa"],["seg","Seguimiento"],["vis","V
 function applyPerms(me){
   const isAdmin=me.rol==="admin", canEdit=me.rol!=="lector", secs=me.secciones||[];
   document.body.classList.toggle("ro",!canEdit);
+  $("#stockTotal").closest(".field").classList.toggle("hidden",!isAdmin);
   $$("#tabs button").forEach(b=>{const v=b.dataset.v;
     const ok=v==="admin"?isAdmin:(isAdmin||secs.includes(v))&&(v!=="carga"||canEdit);
     b.classList.toggle("hidden",!ok);});
   const first=$$("#tabs button").find(b=>!b.classList.contains("hidden")); if(first) first.click();
 }
-$("#tabs").addEventListener("click",e=>{ if(e.target.closest("[data-v=admin]")) loadUsers(); });
+$("#tabs").addEventListener("click",e=>{ if(e.target.closest("[data-v=admin]")){ loadUsers(); loadAudit(); } });
+const TAB_LBL={ctl_entregas:"Entrega",ctl_reposiciones:"Reposición",ctl_visitas:"Visita",ctl_fotos:"Foto",ctl_localidades:"Localidad",ctl_config:"Plan total",ctl_usuarios:"Usuario"};
+const ACC={alta:["verde","Alta"],cambio:["amarillo","Cambio"],baja:["rojo","Baja"]};
+function resumen(a){
+  const d=a.despues||a.antes||{}, p=[];
+  if(d.localidad_id&&D.locName) p.push(D.locName[d.localidad_id]||("Localidad "+d.localidad_id));
+  ["nombre","email","rol","fecha","fecha_entrega","cantidad","valor","observaciones"].forEach(k=>{ if(d[k]!=null&&d[k]!=="") p.push(k==="cantidad"||k==="valor"?fmtN(+d[k]):String(d[k]).slice(0,60)); });
+  return p.join(" · ");
+}
+async function loadAudit(){
+  const {data,error}=await sb.from("ctl_auditoria").select("*").order("fecha",{ascending:false}).limit(100);
+  if(error) return toast("Error: "+error.message);
+  $("#aBody").innerHTML=data.map(a=>`<tr><td style="white-space:nowrap">${new Date(a.fecha).toLocaleString("es-AR",{dateStyle:"short",timeStyle:"short"})}</td><td>${esc(a.usuario)}</td><td><span class="chip ${ACC[a.accion][0]}"><span class="dot"></span>${ACC[a.accion][1]}</span></td><td>${esc(TAB_LBL[a.tabla]||a.tabla)}</td><td>${esc(resumen(a))}</td></tr>`).join("")||`<tr><td class="empty" colspan="5">Todavía no hay cambios registrados.</td></tr>`;
+}
 async function loadUsers(){
   const {data,error}=await sb.from("ctl_usuarios").select("*").order("created_at");
   if(error) return toast("Error: "+error.message);
