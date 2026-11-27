@@ -156,6 +156,30 @@ td.r,th.r{text-align:right}
 .modal-bg{position:fixed;inset:0;background:rgba(6,52,59,.45);display:flex;align-items:center;justify-content:center;z-index:3500;padding:20px}
 .modal{background:#fff;border-radius:16px;padding:22px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
 .modal h3{margin:0 0 14px}
+.brand-img{width:34px;height:34px;border-radius:50%;background:#fff;flex:none}
+.ig{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(45deg,#f09433,#dc2743 50%,#bc1888);color:#fff!important;text-decoration:none;border-radius:8px;padding:7px 10px;font-weight:700;font-size:13px}
+.ig:hover{filter:brightness(1.08)}
+.ig svg{width:15px;height:15px}
+.ig-hero{margin-top:22px;align-self:flex-start}
+.thumbs{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.thumbs img{width:64px;height:64px;object-fit:cover;border-radius:8px;cursor:zoom-in;border:1px solid var(--line)}
+.addph{background:transparent;border:1px dashed #b7c6cd;color:var(--brand);border-radius:8px;padding:4px 10px;font-size:12px;font-weight:700;cursor:pointer;margin-top:8px}
+.addph:hover{background:var(--brand-soft)}
+.gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
+.ph{position:relative;border-radius:14px;overflow:hidden;background:#dfe7eb;aspect-ratio:4/3;cursor:zoom-in;box-shadow:var(--shadow)}
+.ph img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s}
+.ph:hover img{transform:scale(1.04)}
+.ph .cap{position:absolute;left:0;right:0;bottom:0;padding:26px 12px 10px;background:linear-gradient(transparent,rgba(6,30,36,.85));color:#fff;font-size:12.5px}
+.ph .cap b{display:block;font-size:14px}
+.ph .x{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.45);color:#fff;border:0;border-radius:50%;width:28px;height:28px;cursor:pointer;opacity:0;transition:.2s}
+.ph:hover .x{opacity:1}
+.lb{position:fixed;inset:0;background:rgba(4,16,20,.92);z-index:3600;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:20px}
+.lb img{max-width:100%;max-height:82vh;border-radius:10px}
+.lb .lc{color:#dfeff1;margin-top:12px;text-align:center;font-size:14px}
+.lb .nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.12);color:#fff;border:0;width:46px;height:46px;border-radius:50%;font-size:22px;cursor:pointer}
+.lb .prev{left:18px}.lb .next{right:18px}
+.lb .cl{position:absolute;top:14px;right:18px;background:transparent;color:#fff;border:0;font-size:28px;cursor:pointer}
+.up-status{font-size:13px;color:var(--brand);margin-top:8px;min-height:18px}
 
 @media (max-width:1050px){
   .kpis{grid-template-columns:repeat(2,1fr)} .grid-2,.grid-3,.forms{grid-template-columns:1fr}
@@ -176,9 +200,10 @@ td.r,th.r{text-align:right}
   <div class="login-hero">
     <svg class="drops" width="420" height="520" viewBox="0 0 420 520" fill="none"><path d="M210 20C210 20 60 200 60 320a150 150 0 0 0 300 0C360 200 210 20 210 20Z" stroke="#fff" stroke-width="14"/><path d="M210 120C210 120 120 230 120 310a90 90 0 0 0 180 0c0-80-90-190-90-190Z" stroke="#fff" stroke-width="10"/></svg>
     <div>
-      <div class="logo" style="margin-bottom:56px"><svg width="30" height="30" viewBox="0 0 24 24" fill="none"><path d="M12 2s-7 8.2-7 13a7 7 0 0 0 14 0c0-4.8-7-13-7-13Z" fill="#7fe3ea"/></svg><div>Control y Seguimiento<small>Equipos · Filtros · Visitas</small></div></div>
+      <div class="logo" style="margin-bottom:56px"><img class="brand-img" alt="Aquasan"><div>Control y Seguimiento<small>Aquasan · Misiones</small></div></div>
       <h1>Equipos, filtros y visitas en un solo lugar.</h1>
       <p>Seguimiento en línea de equipos entregados por localidad, reposición de filtros y pastillas, y registro de visitas en territorio.</p>
+      <a class="ig ig-hero" href="https://www.instagram.com/aquasan.mnes/" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>@aquasan.mnes</a>
     </div>
     <div class="hero-stats">
       <div><b>Misiones</b><span>Cobertura</span></div>
@@ -204,15 +229,16 @@ td.r,th.r{text-align:right}
 <!-- APP -->
 <section id="app" class="hidden">
   <header class="top"><div class="top-in">
-    <div class="logo"><svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M12 2s-7 8.2-7 13a7 7 0 0 0 14 0c0-4.8-7-13-7-13Z" fill="#7fe3ea"/></svg><div>Control y Seguimiento<small>Equipos · Filtros · Visitas</small></div></div>
+    <div class="logo"><img class="brand-img" alt="Aquasan"><div>Control y Seguimiento<small>Aquasan · Misiones</small></div></div>
     <nav class="tabs" id="tabs">
       <button data-v="dash" class="on">Dashboard</button>
       <button data-v="mapa">Mapa</button>
       <button data-v="seg">Seguimiento</button>
       <button data-v="vis">Visitas</button>
+      <button data-v="gal">Galería</button>
       <button data-v="carga">Carga de datos</button>
     </nav>
-    <div class="user"><span class="em" id="uEmail"></span><button id="passBtn" title="Cambiar contraseña">🔑</button><button id="outBtn">Salir</button></div>
+    <div class="user"><a class="ig" href="https://www.instagram.com/aquasan.mnes/" target="_blank" rel="noopener" title="Instagram de Aquasan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg><span class="em">Instagram</span></a><span class="em" id="uEmail"></span><button id="passBtn" title="Cambiar contraseña">🔑</button><button id="outBtn">Salir</button></div>
   </div></header>
 
   <main>
@@ -291,10 +317,21 @@ td.r,th.r{text-align:right}
             <div class="field"><label>Fecha</label><input type="date" name="fecha" required></div>
             <div class="field"><label>Localidad</label><select name="localidad_id" class="selLoc" required></select></div>
             <div class="field"><label>Observaciones</label><textarea name="observaciones" rows="4" placeholder="Ej: capacitación en escuela, entrega de kits…"></textarea></div>
+            <div class="field"><label>Fotos del viaje</label><input type="file" name="fotos" accept="image/*" multiple></div>
             <button class="btn btn-primary" type="submit">Guardar visita</button>
+            <div class="up-status" id="upStatus"></div>
           </form>
         </div>
       </div>
+    </div>
+
+    <!-- GALERIA -->
+    <div data-view="gal" class="hidden">
+      <div class="page-head">
+        <div><h2>Galería de viajes</h2><p>Fotos de las visitas en territorio. Para sumar fotos, usá "Agregar fotos" en cada visita.</p></div>
+        <select id="galFilter" style="width:auto"></select>
+      </div>
+      <div class="gal" id="gal"></div>
     </div>
 
     <!-- CARGA -->
@@ -422,21 +459,24 @@ sb.auth.onAuthStateChange((ev,session)=>{ if(ev==="SIGNED_IN" && session && $("#
 
 
 async function loadAll(){
-  const [seg,loc,ent,rep,vis,cfg] = await Promise.all([
+  const [seg,loc,ent,rep,vis,cfg,fotRes] = await Promise.all([
     sb.from("ctl_seguimiento").select("*").order("nombre"),
     sb.from("ctl_localidades").select("*").order("nombre"),
     sb.from("ctl_entregas").select("*").order("fecha_entrega",{ascending:false}),
     sb.from("ctl_reposiciones").select("*").order("fecha",{ascending:false}),
     sb.from("ctl_visitas").select("*").order("fecha",{ascending:false}),
-    sb.from("ctl_config").select("*").eq("clave","stock_total").maybeSingle()
+    sb.from("ctl_config").select("*").eq("clave","stock_total").maybeSingle(),
+    sb.from("ctl_fotos").select("*").order("created_at",{ascending:false})
   ]);
-  const err=[seg,loc,ent,rep,vis,cfg].find(r=>r.error);
+  const fot=fotRes;
+  const err=[seg,loc,ent,rep,vis,cfg,fot].find(r=>r.error);
   if(err){toast("Error al cargar datos: "+err.error.message);return}
   D={seg:seg.data,loc:loc.data,ent:ent.data,rep:rep.data,vis:vis.data,stock:Number(cfg.data?.valor||0)};
   D.locName=Object.fromEntries(D.loc.map(l=>[l.id,l.nombre]));
+  D.fotos=fot.data; await signFotos();
   renderAll();
 }
-function renderAll(){ renderDash(); renderSeg(); renderVis(); renderCarga(); fillSelects(); if(map) renderMap(); }
+function renderAll(){ renderDash(); renderSeg(); fillSelects(); renderVis(); renderGal(); renderCarga(); if(map) renderMap(); }
 
 
 function renderDash(){
@@ -503,7 +543,8 @@ function renderMap(){
       <div class="row"><span>Filtros repuestos</span><b class="num">${fmtN(r.repuestos)}</b></div>
       <div class="row"><span>Pendiente</span><b class="num">${fmtN(r.pendiente)}</b></div>
       <div class="row"><span>Vence</span><b>${fmtD(r.vencimiento)}</b></div>
-      <div class="row"><span>Visitas</span><b class="num">${r.visitas}</b></div></div>`);
+      <div class="row"><span>Visitas</span><b class="num">${r.visitas}</b></div>
+      ${fotosDe(r.localidad_id).length?`<button class="addph" onclick="verGaleria(${r.localidad_id})">📷 Ver ${fotosDe(r.localidad_id).length} fotos</button>`:""}</div>`);
     pts.push([r.lat,r.lng]);
   });
   if(pts.length) map.fitBounds(pts,{padding:[40,40]});
@@ -527,7 +568,7 @@ $("#segSearch").addEventListener("input",renderSeg);
 function renderVis(){
   const f=$("#visFilter").value;
   const list=D.vis.filter(v=>!f||String(v.localidad_id)===f);
-  $("#timeline").innerHTML=list.map(v=>`<div class="tl"><div class="tl-head"><div class="when">${fmtD(v.fecha)}</div></div><div class="where">${esc(D.locName[v.localidad_id])}</div>${v.observaciones?`<div class="obs">${esc(v.observaciones)}</div>`:""}</div>`).join("")||`<div class="empty">Sin visitas.</div>`;
+  $("#timeline").innerHTML=list.map(v=>`<div class="tl"><div class="tl-head"><div class="when">${fmtD(v.fecha)}</div></div><div class="where">${esc(D.locName[v.localidad_id])}</div>${v.observaciones?`<div class="obs">${esc(v.observaciones)}</div>`:""}${thumbsHtml(v.id)}<button class="addph" data-addph="${v.id}">📷 Agregar fotos</button></div>`).join("")||`<div class="empty">Sin visitas.</div>`;
 }
 $("#visFilter").addEventListener("change",renderVis);
 
@@ -547,6 +588,7 @@ function renderCarga(){
 document.addEventListener("click",async e=>{
   const b=e.target.closest(".del"); if(!b) return;
   if(!confirm("¿Borrar este registro?")) return;
+  if(b.dataset.t==="ctl_visitas"){const ps=D.fotos.filter(f=>f.visita_id==b.dataset.id).flatMap(f=>[f.path,thumbPath(f.path)]); if(ps.length) await sb.storage.from("ctl-fotos").remove(ps);}
   const {error}=await sb.from(b.dataset.t).delete().eq("id",b.dataset.id);
   if(error) return toast("No se pudo borrar: "+error.message);
   toast("Registro borrado"); loadAll();
@@ -561,7 +603,14 @@ async function save(form,table,mapFn,okMsg){
 }
 $("#fEnt").addEventListener("submit",e=>{e.preventDefault();save(e.target,"ctl_entregas",o=>({...o,localidad_id:+o.localidad_id,cantidad:+o.cantidad}),"Entrega guardada ✓")});
 $("#fRep").addEventListener("submit",e=>{e.preventDefault();save(e.target,"ctl_reposiciones",o=>({...o,localidad_id:+o.localidad_id,cantidad:+o.cantidad}),"Reposición guardada ✓")});
-$("#fVis").addEventListener("submit",e=>{e.preventDefault();save(e.target,"ctl_visitas",o=>({...o,localidad_id:+o.localidad_id}),"Visita guardada ✓")});
+$("#fVis").addEventListener("submit",async e=>{
+  e.preventDefault(); const f=e.target, files=[...f.fotos.files], btn=f.querySelector("button[type=submit]");
+  const o=formData(f); delete o.fotos; btn.disabled=true;
+  const {data,error}=await sb.from("ctl_visitas").insert({...o,localidad_id:+o.localidad_id}).select().single();
+  if(error){btn.disabled=false;return toast("Error: "+error.message)}
+  if(files.length) await uploadFotos(data,files);
+  btn.disabled=false; f.reset(); setDefaults(); toast("Visita guardada ✓"); loadAll();
+});
 $("#fLoc").addEventListener("submit",async e=>{
   e.preventDefault(); const o=formData(e.target), st=$("#stockTotal").value;
   if(st!=="" && Number(st)!==D.stock){
@@ -596,6 +645,89 @@ $("#tabs").addEventListener("click",e=>{
   if(b.dataset.v==="mapa"){ if(!map) initMap(); else setTimeout(()=>map.invalidateSize(),50); }
   window.scrollTo({top:0});
 });
+
+// FOTOS
+const LOGO="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABABAMAAABYR2ztAAAAMFBMVEX7/f0AAAADbrEpktD7+/tfp9GjzeX19fb39/guh72Gu9murq95eXlkZGSjpKS+vsB3gItTAAAAEHRSTlP9AP//CP//YqH//wwGp19lNTn3YAAABApJREFUeNp91s+LJHcZBvBPVXX3TK9Z6SJIEFyZtKhEtneLDDE4Ae2FXJSEtJocdgnJZJccQmKYEPEm7ME/oDUieFhpFC/uwcGAuXjYQA6rGCnSmI0B3UYhm5gfXRCSbE9PdXn4Vs/07krqUlQ9z/et93l/VpSqr6SXJ+d+VIh++Zc86eXL11F6iH/9G+fB+jMXDhlLQtIbPzpcnrK2NV4yloRsFWdta1zeQNjMb8BZ20peXSEk5eM34qwdyXKIQe/em3Gz58eHFhLvhbeth/6l+90z4eGUfEnITgYDp/8cFN03grWjZU1IknegdbxY2j+xC8/lefChdxo8cIB7bQS/GAcLSfYn+F6+4mL0T7i/zCVtd+9P0PyEKG232+32+nU+9z7+3b0mpuzDMdJO/NXNzbs3opT9ERo5URpcjDekvvS7IPbBSVWsvx7cjGV3wYY07gXc3osbkevbeCGRtO/ILpN0UsdH4jvTNE2n5ZWt2fWrBc1pFSfJEA9Fjo0YgBEv6rQxy7LYGPJOsos+2GXvteipAXqSrdsntD+7fjzHP8C1gsXWpasFf+3GZYbTnWSEZp0y+EPURJLHyRAnfA0agVDB3FHMsjiHF+IRzEgyQrFl0QBlnKDZmS/dn7+Ebfi1CbI4wsIGKOh/Eu7MtdDRR7IZPt7tfpmz3W6gf/8eNOIM26EymzzNb2oZOpDEOfqRWkTOvJZhBGWchdAFEckIWS03XiCJO7BXH5mHSM9WSiteqbNCBuu19SB3lTAM3/qYlTZaITQldSMr/i+hIYixW+s0OiC0goi9um9rncFCgU4DBsFH9kO6FjGqkM25g3LCE8H/7cNAjRbbGNYlWacteBpCTXFQTrT+S05rEqGM30DsrYNyCploUTmDH8cV5kXFbJmT8o9UPFZdQhGXcHIxMFq6uVHVid1FHmch9W85X0f4bKNktp34EJLo1MkhzS92eh/hIs5+0MTFzeqDCWtHvdKH7uY9aI6gNcS5ze4AjfvjwRU4XywGzPfg0R2O5FW0ix+UsR6cq4r/bPPUgOYJWt9WlDAWl+UO5juV8bby9COPDHe0HpxM9bGW51G6uX8J7c+HCdM6M/Lk30w13kSj/+pyBPnZUCreSE0XE1O+OQojKEpl3zqP5jGE0V8VLCZYv60Uh35l3sd0Op1OpwXJBPYzYvKfg19lK7vgPtAvSdqqOwaX4cqpt5f4vWGaT6+RtHn37x+BKw9fBc9HoS+erd5eroPfd+qzv93lM3XbHK4DR2bvufUKCyWGjy9cvhX/yZuhGtM0TdMvpDs342vpy2mapulyLb7x8KeuxU9ZrMveHF+4WNyA925q3vLcV+58Kex26z88Mr5luZP0cq//tKMqvjNY+T34H0Z8VMukx4O4AAAAAElFTkSuQmCC";
+$$(".brand-img").forEach(i=>i.src=LOGO);
+{const l=document.createElement("link");l.rel="icon";l.href=LOGO;document.head.appendChild(l);}
+D.fotos=[]; const URLS={};
+const thumbPath=p=>p.replace(/\.jpg$/,"_t.jpg");
+const fotosDe=loc=>D.fotos.filter(f=>f.localidad_id===loc);
+async function signFotos(){
+  const need=D.fotos.flatMap(f=>[f.path,thumbPath(f.path)]).filter(p=>!URLS[p]);
+  for(let i=0;i<need.length;i+=100){
+    const {data}=await sb.storage.from("ctl-fotos").createSignedUrls(need.slice(i,i+100),3600*6);
+    (data||[]).forEach(x=>{if(x.signedUrl)URLS[x.path]=x.signedUrl});
+  }
+}
+function thumbsHtml(vid){
+  const fs=D.fotos.filter(f=>f.visita_id===vid); if(!fs.length) return "";
+  return `<div class="thumbs">${fs.map(f=>`<img loading="lazy" src="${URLS[thumbPath(f.path)]||""}" data-ph="${f.id}" alt="">`).join("")}</div>`;
+}
+async function shrink(file,max){
+  const bmp=await createImageBitmap(file); const k=Math.min(1,max/Math.max(bmp.width,bmp.height));
+  const c=document.createElement("canvas"); c.width=Math.round(bmp.width*k); c.height=Math.round(bmp.height*k);
+  c.getContext("2d").drawImage(bmp,0,0,c.width,c.height);
+  return await new Promise(r=>c.toBlob(r,"image/jpeg",.82));
+}
+async function uploadFotos(v,files){
+  const st=$("#upStatus"); let ok=0;
+  for(const [i,file] of files.entries()){
+    const msg=`Subiendo foto ${i+1} de ${files.length}…`; toast(msg); if(st) st.textContent=msg;
+    try{
+      const base=`${v.localidad_id}/${v.id}/${crypto.randomUUID()}`;
+      const [full,th]=await Promise.all([shrink(file,1600),shrink(file,420)]);
+      const a=await sb.storage.from("ctl-fotos").upload(base+".jpg",full,{contentType:"image/jpeg"}); if(a.error) throw a.error;
+      const b=await sb.storage.from("ctl-fotos").upload(base+"_t.jpg",th,{contentType:"image/jpeg"}); if(b.error) throw b.error;
+      const c=await sb.from("ctl_fotos").insert({visita_id:v.id,localidad_id:v.localidad_id,path:base+".jpg"}); if(c.error) throw c.error;
+      ok++;
+    }catch(err){ toast(`No se pudo subir ${file.name}: ${err.message||err}`); }
+  }
+  if(st) st.textContent=""; toast(`${ok} foto(s) subida(s) ✓`);
+}
+document.addEventListener("click",e=>{
+  const a=e.target.closest("[data-addph]"); if(!a) return;
+  const v=D.vis.find(x=>x.id==a.dataset.addph); const inp=document.createElement("input");
+  inp.type="file"; inp.accept="image/*"; inp.multiple=true;
+  inp.onchange=async()=>{ if(inp.files.length){ await uploadFotos(v,[...inp.files]); loadAll(); } }; inp.click();
+});
+function renderGal(){
+  const sel=$("#galFilter"), cur=sel.value, locs=[...new Set(D.fotos.map(f=>f.localidad_id))];
+  sel.innerHTML=`<option value="">Todas las localidades (${D.fotos.length})</option>`+locs.map(l=>`<option value="${l}">${esc(D.locName[l])} (${fotosDe(l).length})</option>`).join(""); sel.value=cur;
+  const list=D.fotos.filter(f=>!sel.value||String(f.localidad_id)===sel.value);
+  $("#gal").innerHTML=list.map(f=>{const v=D.vis.find(x=>x.id===f.visita_id)||{};
+    return `<div class="ph" data-ph="${f.id}"><img loading="lazy" src="${URLS[thumbPath(f.path)]||""}" alt=""><div class="cap"><b>${esc(D.locName[f.localidad_id])}</b>${fmtD(v.fecha)}${v.observaciones?" · "+esc(v.observaciones):""}</div><button class="x" data-delph="${f.id}" title="Borrar foto">✕</button></div>`}).join("")
+    || `<div class="empty">Todavía no hay fotos. Agregalas desde la pestaña Visitas 📷</div>`;
+}
+$("#galFilter").addEventListener("change",renderGal);
+function verGaleria(loc){ $("#galFilter").value=String(loc); $("#tabs [data-v=gal]").click(); renderGal(); }
+document.addEventListener("click",async e=>{
+  const d=e.target.closest("[data-delph]");
+  if(d){ e.stopPropagation(); if(!confirm("¿Borrar esta foto?")) return;
+    const f=D.fotos.find(x=>x.id==d.dataset.delph);
+    await sb.storage.from("ctl-fotos").remove([f.path,thumbPath(f.path)]);
+    const {error}=await sb.from("ctl_fotos").delete().eq("id",f.id);
+    if(error) return toast("Error: "+error.message); toast("Foto borrada"); loadAll(); return; }
+  const p=e.target.closest("[data-ph]"); if(!p) return;
+  const inGal=!!p.closest("#gal"), id=+p.dataset.ph;
+  const vid=(D.fotos.find(x=>x.id===id)||{}).visita_id;
+  const list=inGal?[...$$("#gal [data-ph]")].map(x=>+x.dataset.ph):D.fotos.filter(f=>f.visita_id===vid).map(f=>f.id);
+  openLb(list,list.indexOf(id));
+});
+function openLb(ids,i){
+  const lb=document.createElement("div"); lb.className="lb";
+  lb.innerHTML=`<button class="cl">✕</button><button class="nav prev">‹</button><img alt=""><div class="lc"></div><button class="nav next">›</button>`;
+  const show=()=>{const f=D.fotos.find(x=>x.id===ids[i]),v=D.vis.find(x=>x.id===f.visita_id)||{};
+    lb.querySelector("img").src=URLS[f.path]||URLS[thumbPath(f.path)];
+    lb.querySelector(".lc").textContent=`${D.locName[f.localidad_id]} · ${fmtD(v.fecha)}${v.observaciones?" · "+v.observaciones:""}  (${i+1}/${ids.length})`;};
+  const go=d=>{i=(i+d+ids.length)%ids.length;show()};
+  lb.querySelector(".prev").onclick=()=>go(-1); lb.querySelector(".next").onclick=()=>go(1);
+  const close=()=>{lb.remove();document.removeEventListener("keydown",key)};
+  const key=e=>{if(e.key==="Escape")close();if(e.key==="ArrowLeft")go(-1);if(e.key==="ArrowRight")go(1)};
+  lb.querySelector(".cl").onclick=close; lb.onclick=e=>{if(e.target===lb)close()};
+  document.addEventListener("keydown",key); if(ids.length<2) lb.querySelectorAll(".nav").forEach(b=>b.remove());
+  document.body.appendChild(lb); show();
+}
 
 setDefaults();
 boot();
